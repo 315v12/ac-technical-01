@@ -1,6 +1,6 @@
-cat <<EOF >> .gitignore
+cat > .gitignore <<EOF
 .terraform/
 *.tfstate
 *.tfstate.*
+.terraform.lock.hcl
 EOF
-wget-log
