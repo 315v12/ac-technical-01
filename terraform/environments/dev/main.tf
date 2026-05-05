@@ -1,30 +1,24 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-    okta = {
-      source  = "okta/okta"
-      version = "~> 4.0"
-    }
+# Fetches credentials from AWS Secrets Manager
+data "aws_secretsmanager_secret" "okta_token" {
+  name = "activecampaign/okta/api_key"
+}
+
+data "aws_secretsmanager_secret_version" "latest" {
+  secret_id = data.aws_secretsmanager_secret.okta_token.id
+}
+
+# Use the secret to configure EC2 instances
+resource "aws_instance" "ac_server" {
+  count         = 2
+  ami           = "ami-053b0d53c279acc90" #Ubuntu 22.04#
+  instance_type = "t3.medium"
+
+  user_data = <<-EOF
+              #!/bin/bash
+              echo "OKTA_TOKEN=${data.aws_secretsmanager_secret_version.latest.secret_string}" >> /etc/environment
+              EOF
+
+  tags = {
+    Name = "ac-tech-app0${count.index + 1}"
   }
-}
-
-provider "aws" {
-  region = "us-east-1"
-}
-
-provider "okta" {
-  org_name  = "test-org"
-  base_url  = "okta.com"
-  api_token = "dummy-token"
-}
-
-module "ec2" {
-  source = "../../modules/ec2"
-
-  ami_id        = "ami-12345678"
-  instance_type = "t2.micro"
-  env           = "dev"
 }

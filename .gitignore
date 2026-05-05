@@ -3,3 +3,4 @@ cat <<EOF >> .gitignore
 *.tfstate
 *.tfstate.*
 EOF
+wget-log
