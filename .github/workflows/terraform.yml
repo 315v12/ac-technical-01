@@ -1,9 +1,9 @@
-name: Terraform CI
+name: Terraform CI/CD
 
 on:
+  pull_request:
   push:
     branches: ["main"]
-  pull_request:
 
 jobs:
   terraform:
@@ -28,10 +28,20 @@ jobs:
           aws-region: us-east-1
 
       - name: Terraform Init
-        run: terraform init
+        run: terraform init -input=false -reconfigure
 
       - name: Terraform Validate
         run: terraform validate
 
       - name: Terraform Plan
-        run: terraform plan
+        run: terraform plan -out=tfplan
+
+      - name: Upload Plan Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan
+          path: terraform/environments/dev/tfplan
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main'
+        run: terraform apply -auto-approve tfplan
