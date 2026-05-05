@@ -49,3 +49,17 @@ terraform/
 .github/
 └── workflows/
     └── terraform.yml
+
+## Usage
+
+### Local execution (optional)
+
+This project is primarily designed to run via CI/CD (GitHub Actions).
+
+For local validation:
+
+```bash
+cd terraform/environments/dev
+terraform init
+terraform validate
+terraform plan
